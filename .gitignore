@@ -1,0 +1,4 @@
+/.config/nvim/.cache
+/.config/nvim/cache_nvim
+/.config/nvim/state_nvim.vim
+.ruby-gemset
