@@ -201,7 +201,7 @@ let g:rainbow_conf = {
 \      'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/'],
 \    },
 \    'ruby': {
-\      'ctermfgs': ['Red', 'Blue', 'Green', 'Yellow', 'Grey']
+\      'ctermfgs': ['Grey', 'Green', 'Yellow', 'Blue', 'Red']
 \    },
 \    'elixir': {
 \      'ctermfgs': ['Red', 'Blue', 'Green', 'Yellow', 'Grey']
@@ -339,11 +339,6 @@ function! SetNumberDisplay()
   endif
 endfunction
 
-let g:hardtime_default_on = 1
-let g:hardtime_timeout = 2000
-let g:hardtime_showmsg = 1
-let g:hardtime_maxcount = 3
-
 " inoremap <silent><expr> <TAB>
 "       \ pumvisible() ? "\<C-n>" :
 "       \ <SID>check_back_space() ? "\<TAB>" :
@@ -357,3 +352,15 @@ let g:hardtime_maxcount = 3
 " let g:coc_global_extensions = ['coc-solargraph']
 " let g:coc_global_extensions = ['coc-json']
 " let g:coc_global_extensions = ['coc-java']
+
+" Decode the big blobs of base64 encoded saml that we get in the logs
+" Install xmllint on ubuntu with: apt-get install libxml2-utils
+nnoremap <leader>sd "+p:SamlDecode<cr>
+command! SamlDecode :call s:SamlDecode()
+function! s:SamlDecode() abort
+    %!base64 -d
+    %!xmllint --format -
+    setf xml
+endfunction
+
+autocmd Filetype gitcommit setlocal spell textwidth=72

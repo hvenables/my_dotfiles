@@ -1,8 +1,27 @@
 #------------------------------------------------------------------------------
+
 # ActiveRecord has_many
 
 snippet hm "has_many (hm)"
 has_many :${1:object}${2:, class_name: '${3:class_name}', foreign_key: '${4:reference}'}
+endsnippet
+
+snippet clam "Active Record Model" b
+class ${1:`!v substitute(vim_snippets#Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationRecord
+	$0
+end
+endsnippet
+
+snippet clap "Policy Model" b
+class ${1:`!v substitute(vim_snippets#Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationPolicy
+	$0
+end
+endsnippet
+
+# GraphQL
+
+snippet mut "Mutation"
+
 endsnippet
 
 #------------------------------------------------------------------------------
