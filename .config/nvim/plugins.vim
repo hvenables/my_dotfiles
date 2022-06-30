@@ -16,6 +16,7 @@ Plug 'easymotion/vim-easymotion'
 Plug 'sheerun/vim-polyglot'
 " Ruby
 Plug 'tpope/vim-rails'
+Plug 'vim-ruby/vim-ruby'
 Plug 'kana/vim-textobj-user'
 Plug 'nelstrom/vim-textobj-rubyblock'
 Plug 'tpope/vim-bundler'
@@ -56,10 +57,16 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
 Plug 'danro/rename.vim'
+Plug 'schickling/vim-bufonly'
 
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+
+
+" Plug 'leafgarland/typescript-vim'
+Plug 'jparise/vim-graphql'
+
 
 call plug#end()

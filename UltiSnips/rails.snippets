@@ -80,10 +80,10 @@ endsnippet
 # Rspec
 
 snippet rspec "snippet template" b
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe ${2}${1:`!v substitute(substitute(vim_snippets#Filename(), '\(_\|^\)\(.\)', '\u\2', 'g'), 'Spec', '', 'g')`} do
-	describe '${3:something}' do
+	describe "${3:something}" do
 		$0
 	end
 end

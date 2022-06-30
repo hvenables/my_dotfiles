@@ -104,12 +104,15 @@ nnoremap <C-l> <C-w>l
 
 " Vim fugitive maping
 nnoremap <leader>ga :Git add %:p<CR><CR>
-nnoremap <leader>gs :Gstatus<CR>
-nnoremap <leader>gc :Gcommit -v -q<CR>
+nnoremap <leader>gc :Git commit -v -q<CR>
 nnoremap <leader>gd :Gdiff<CR>
 nnoremap <leader>gm :Gmove<Space>
-nnoremap <leader>gb :Gblame<CR>
+nnoremap <leader>gb :Git blame<CR>
 nnoremap <leader>go :Git checkout<Space>
+
+nmap <leader>gs :G<CR>
+nmap <leader>gj :diffget //3<CR>
+nmap <leader>gf :diffget //2<CR>
 
 " Navigating from terminal
 tnoremap <Esc> <C-\><C-n>
@@ -160,6 +163,24 @@ nmap <Leader>bd :BD<CR>
 cnoreabbrev vb vs \| b
 cnoreabbrev vd bp \| bd #
 
+let g:coc_global_extensions = ['coc-solargraph']
+let g:coc_global_extensions = ['coc-json']
+" let g:coc_global_extensions = ['coc-java']
+
+
+" if executable('nvm') == 1
+"   let g:coc_global_extensions = ['coc-tsserver']
+" end
+" Remap keys for applying codeAction to the current line.
+" nmap <leader>ac  <Plug>(coc-codeaction)
+" " Apply AutoFix to problem on the current line.
+" nmap <leader>qf  <Plug>(coc-fix-current)
+
+" nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gy <Plug>(coc-type-definition)
+" nmap <silent> gi <Plug>(coc-implementation)
+" nmap <silent> gr <Plug>(coc-references)
+
 let g:multi_cursor_exit_from_insert_mode = 0
 
 " Jsx on all js files
@@ -171,6 +192,7 @@ let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<c-s>"
 
 let g:UltiSnipsSnippetDirectories=["UltiSnips", $HOME.'/UltiSnips']
+" let g:UltiSnipsSnippetDirectories=["UltiSnips"]
 
 augroup Ultisnips
 autocmd bufenter,bufnewfile */factories/*.rb UltiSnipsAddFiletypes factory_bot
@@ -269,12 +291,31 @@ nnoremap <C-p> :GFiles --others --exclude-standard --cached<CR>
 nnoremap <C-a> :Files<CR>
 nnoremap <C-b> :Buffers<CR>
 
-nnoremap <silent> K :Rg <C-R><C-W><CR>
-nnoremap <silent> \ :Rg<CR>
+nnoremap <C-t> :Tags <C-R><C-W><CR>
+
+nnoremap <silent> K :RG <C-R><C-W><CR>
+nnoremap <silent> \ :RG<CR>
 
 nnoremap <silent> <Leader>st :GStatus<CR>
 
 autocmd! FileType fzf tnoremap <buffer> <esc> <c-c>
+
+function! RipgrepFzf(query, fullscreen)
+  let command_fmt = 'rg --column --line-number --no-heading --color=always --smart-case -- %s || true'
+  let initial_command = printf(command_fmt, shellescape(a:query))
+  let reload_command = printf(command_fmt, '{q}')
+  let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
+  call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
+endfunction
+
+command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
+
+" Path completion with custom source command
+inoremap <expr> <c-x><c-f> fzf#vim#complete#path('fd')
+inoremap <expr> <c-x><c-f> fzf#vim#complete#path('rg --files')
+
+" Word completion with custom spec with popup layout option
+inoremap <expr> <c-x><c-k> fzf#vim#complete#word({'window': { 'width': 0.2, 'height': 0.9, 'xoffset': 1 }})
 
 " Veritcal line config
 let g:indentLine_color_term = 239
@@ -285,7 +326,9 @@ autocmd! BufWritePost *.ex Neomake elixir
 
 autocmd! BufWritePost *.kt Neomake ktlint
 
-autocmd! BufWritePost *.rb Neomake rubocop
+if executable('rubocop') == 1
+  autocmd! BufWritePost *.rb Neomake rubocop
+end
 
 if executable('pep8') == 1
   autocmd! BufWritePost *.py Neomake pep8
@@ -308,6 +351,7 @@ let g:neomake_error_sign = {
 let g:neomake_info_sign = {
       \ 'text': '➤'
       \ }
+
 
 augroup AutoSwap
         autocmd!
@@ -339,20 +383,6 @@ function! SetNumberDisplay()
   endif
 endfunction
 
-" inoremap <silent><expr> <TAB>
-"       \ pumvisible() ? "\<C-n>" :
-"       \ <SID>check_back_space() ? "\<TAB>" :
-"       \ coc#refresh()
-" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-" function! s:check_back_space() abort
-"   let col = col('.') - 1
-"   return !col || getline('.')[col - 1]  =~# '\s'
-" endfunction
-" let g:coc_global_extensions = ['coc-solargraph']
-" let g:coc_global_extensions = ['coc-json']
-" let g:coc_global_extensions = ['coc-java']
-
 " Decode the big blobs of base64 encoded saml that we get in the logs
 " Install xmllint on ubuntu with: apt-get install libxml2-utils
 nnoremap <leader>sd "+p:SamlDecode<cr>
@@ -364,3 +394,59 @@ function! s:SamlDecode() abort
 endfunction
 
 autocmd Filetype gitcommit setlocal spell textwidth=72
+
+
+function! s:list_buffers()
+  redir => list
+  silent ls
+  redir END
+  return split(list, "\n")
+endfunction
+
+function! s:delete_buffers(lines)
+  execute 'bwipeout' join(map(a:lines, {_, line -> split(line)[0]}))
+endfunction
+
+command! BD call fzf#run(fzf#wrap({
+  \ 'source': s:list_buffers(),
+  \ 'sink*': { lines -> s:delete_buffers(lines) },
+  \ 'options': '--multi --bind ctrl-a:select-all+accept'
+\ }))
+
+" Folding
+" set foldmethod=syntax
+
+" let g:vimsyn_folding='af'
+" let ruby_fold = 1
+" let g:tex_fold_enabled=1
+
+" set foldenable
+" specifies for which commands a fold will be opened
+" set foldopen=block,hor,insert,jump,mark,percent,quickfix,search,tag,undo
+"
+" nnoremap <silent> zr zr:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zm zm:<c-u>setlocal foldlevel?<CR>
+
+" nnoremap <silent> zR zR:<c-u>setlocal foldlevel?<CR>
+" nnoremap <silent> zM zM:<c-u>setlocal foldlevel?<CR>
+
+" " Change Option Folds
+" nnoremap zi  :<c-u>call <SID>ToggleFoldcolumn(1)<CR>
+" nnoremap coz :<c-u>call <SID>ToggleFoldcolumn(0)<CR>
+" nmap     cof coz
+
+" function! s:ToggleFoldcolumn(fold)
+"   if &foldcolumn
+"     let w:foldcolumn = &foldcolumn
+"     silent setlocal foldcolumn=0
+"     if a:fold | silent setlocal nofoldenable | endif
+"   else
+"       if exists('w:foldcolumn') && (w:foldcolumn!=0)
+"         silent let &l:foldcolumn=w:foldcolumn
+"       else
+"         silent setlocal foldcolumn=4
+"       endif
+"       if a:fold | silent setlocal foldenable | endif
+"   endif
+"   setlocal foldcolumn?
+" endfunction

@@ -30,6 +30,9 @@
   bd = branch -D
   rm-br = !"git fetch -p && for branch in $(git branch -vv | grep ': gone]' | awk '{print $1}'); do git branch -D $branch; done"
   # }}}
+  # fetch {{{
+  ft = fetch
+  # }}}
   # log {{{
   hist = !"git hist-specific --all"
   hist-specific = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) %C(white)%s%C(reset)%C(auto)%d%C(reset)%n''         %C(cyan)%aD%C(reset) %C(green)(%ar)%C(reset) %C(cyan)(committed: %cD)%C(reset)%n''         %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'

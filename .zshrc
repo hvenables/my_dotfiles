@@ -6,7 +6,7 @@ export PATH=$PATH:$GOPATH/bin
 # RVM (ruby version manager)
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
-ZSH_THEME="af-magic"
+ZSH_THEME="af-magic-custom"
 # Uncomment the following line to disable auto-setting terminal title.
 DISABLE_AUTO_TITLE="true"
 function precmd () {
@@ -31,6 +31,14 @@ bindkey -M vicmd '^R' history-incremental-search-backward
 # User configuration
 export EDITOR=/usr/bin/nvim
 export COMPOSE_HTTP_TIMEOUT=600
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+export XDG_RUNTIME_DIR=/run/user/$(id -u harry)
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+export FZF_DEFAULT_OPTS="--history=$HOME/.fzf_history"
+export KUBECONFIG=~/.kube/oddjob
+
+export GPG_TTY=$(tty)
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 # Preferred editor for local and remote sessions
@@ -47,6 +55,8 @@ export COMPOSE_HTTP_TIMEOUT=600
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
+source <(kubectl completion zsh)
+
 source $HOME/.zsh_aliases
 [[ -s "$HOME/.zsh_work_aliases" ]] && source "$HOME/.zsh_work_aliases"
 
@@ -55,9 +65,21 @@ source $HOME/.zsh_aliases
 fpath=(~/.zsh/Completion $fpath)
 eval "$(direnv hook zsh)"
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$GEM_HOME/bin:$PATH"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"  # Load RVM into a shell session *as a function*
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+# the fix
+if [ -n $TMUX ] && [ 'rvm: function' = "$(whence -w rvm)" ]; then
+  # NOTE: rvm does some hanky-panky with STDERR so it can always shout
+  #   its warnings at you, even when you're running the command to fix the
+  #   thing it's warning you about.
+  # We redirect file descriptor 6 here to circumvent this nonsense.
+  rvm use default >/dev/null 2>&1 6>&1
+  cd .
+fi
+
+#
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"

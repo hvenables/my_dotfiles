@@ -2,3 +2,5 @@
 /.config/nvim/cache_nvim
 /.config/nvim/state_nvim.vim
 .ruby-gemset
+Gemfile.local
+Gemfile.local.lock
